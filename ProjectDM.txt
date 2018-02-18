@@ -1,0 +1,218 @@
+import pandas as pd
+import matplotlib.pyplot as plt
+import matplotlib.pyplot as pl
+import matplotlib
+import scipy
+import numpy as np
+import sklearn
+from  sklearn import datasets
+from sklearn import metrics
+from sklearn.metrics import accuracy_score
+from sklearn import neighbors
+from sklearn.model_selection import train_test_split
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn import svm
+from sklearn.svm import SVC
+from sklearn.tree import DecisionTreeClassifier, export_graphviz
+from sklearn.preprocessing import MinMaxScaler
+from numpy import genfromtxt
+
+from pandas.plotting import scatter_matrix
+
+url= "C:/Users/mahmood/PycharmProjects/projectDM/test.csv"
+names = ["fl", "fw", "size", "fConc","fConc1","fAsym","fM3Long","fM3Trans","fAlpha","fDist","class"]
+data = pd.read_csv( url ,sep=',',
+                  names = names)
+
+
+
+'''
+1.  fLength:  continuous  # major axis of ellipse [mm]
+    2.  fWidth:   continuous  # minor axis of ellipse [mm]
+    3.  fSize:    continuous  # 10-log of sum of content of all pixels [in #phot]
+    4.  fConc:    continuous  # ratio of sum of two highest pixels over fSize  [ratio]
+    5.  fConc1:   continuous  # ratio of highest pixel over fSize  [ratio]
+    6.  fAsym:    continuous  # distance from highest pixel to center, projected onto major axis [mm]
+    7.  fM3Long:  continuous  # 3rd root of third moment along major axis  [mm]
+    8.  fM3Trans: continuous  # 3rd root of third moment along minor axis  [mm]
+    9.  fAlpha:   continuous  # angle of major axis with vector to origin [deg]
+   10.  fDist:    continuous  # distance from origin to center of ellipse [mm]
+   11.  class:    g,h         # gamma (signal), hadron (background)
+
+'''
+
+
+#Plot histogram and boxplot (uni-variate analysis)
+
+data.plot()
+data.hist()
+data.plot(kind='box')
+plt.show()
+
+# plot correlation matrix (Bi-variate analysis)
+correlations = data.corr()
+fig = plt.figure()
+ax = fig.add_subplot(111)
+cax = ax.matshow(correlations, vmin=-1, vmax=1)
+fig.colorbar(cax)
+ticks = np.arange(0,9,1)
+ax.set_xticks(ticks)
+ax.set_yticks(ticks)
+ax.set_xticklabels(names)
+ax.set_yticklabels(names)
+data.plot()
+plt.show()
+
+
+#plot scatterplot matrix (Bi-variate analysis)
+
+scatter_matrix(data)
+plt.show()
+
+
+#Plot the class distribution
+
+#Feature-Class Relationships
+
+#data.groupby('class').hist()
+
+#Overlapping Attribute Histograms for Each Class
+
+#data.groupby('class').plas.hist(alpha=0.4)
+
+#Feature-Feature Relationships
+scatter_matrix(data, alpha=0.2, figsize=(6, 6), diagonal='kde')
+
+#Preprocessing/ transformation
+# Based on the results thus far, consider
+# whether you want to filter out some features ( feature selection ) or
+# whether you want to create derived features ( feature transformation ).
+
+print("Preprocessing/ transformation")
+# 1. Scale Data
+
+array = data.values
+# separate array into input and output components
+X = array[:,0:8]
+Y = array[:,8]
+scaler = MinMaxScaler(feature_range=(0, 1))
+rescaledX = scaler.fit_transform(X)
+# summarize transformed data
+np.set_printoptions(precision=3)
+print(rescaledX[0:5,:])
+
+# 2. Standardize Data
+
+scaler2 = MinMaxScaler().fit(X)
+rescaledX = scaler2.transform(X)
+# summarize transformed data
+np.set_printoptions(precision=3)
+print(rescaledX[0:5,:])
+
+
+# 3. Normalize Data
+
+scaler3 = MinMaxScaler().fit(X)
+normalizedX = scaler3.transform(X)
+# summarize transformed data
+np.set_printoptions(precision=3)
+print(normalizedX[0:5,:])
+'''
+#  4. Binarize Data (Make Binary)
+
+binarizer = MinMaxScaler(threshold=0.0).fit(X)
+binaryX = binarizer.transform(X)
+# summarize transformed data
+np.set_printoptions(precision=3)
+print(binaryX[0:5,:])
+'''
+
+# Classification
+
+print("CLASSIFICATION----knn-ALGORITHM-----")
+#KNN-ALGORITHM neighbor model to the data
+# the columns that we will be making predictions with.
+x_columns= ["fl", "fw", "size", "fConc","fConc1","fAsym","fM3Long","fM3Trans","fAlpha","fDist"]
+#the column which we want to predict
+y_colums=["class"]
+
+#divide the data intto train data and test data
+x_train, x_test, y_train, y_test= train_test_split(data[x_columns],data[y_colums],test_size=0.3,random_state=0)
+
+#create KNN- algorithm
+#look at the four closest neighbours
+model=KNeighborsClassifier(n_neighbors=4)
+
+#fit the model on the training data
+model.fit(x_train,y_train.values.ravel())
+#make point predictions on the test set using the fit model
+predicted=model.predict(x_test)
+#calculate accuracy
+print("accuracy is", accuracy_score(y_test,predicted))
+print(metrics.classification_report(y_test,predicted))
+#calculate confusion matrix
+confusion=metrics.confusion_matrix(y_test,predicted)
+print("confusion")
+print(confusion)
+
+print("(Support vector machines (SVMs) algorithm")
+
+#SVM (Support vector machines (SVMs) algorithm
+
+
+svm=SVC()
+svm.fit(x_train,y_train.values.ravel())
+predicted=svm.predict(x_test)
+print("SVM")
+
+print("accuracy is", accuracy_score(y_test,predicted))
+print(metrics.classification_report(y_test,predicted))
+#calculate confusion matrix
+confusion=metrics.confusion_matrix(y_test,predicted)
+print("confusion")
+print(confusion)
+
+TP=confusion[1,1]
+TN=confusion[0,0]
+FP=confusion[0,1]
+FN=confusion[1,0]
+
+sensitivity=TP/float(FN+TP)
+print("sensitivity is", sensitivity)
+
+specificity=TN/(TN+FP)
+print("specificity is", specificity)
+
+
+#DECISON TREES ALGORITHM
+
+
+print(" --------------DTs Decision trees algorithm-----------")
+
+print ("Dataset Lenght:: ", len(data))
+print ("Dataset Shape:: ", data.shape)
+
+print ("Dataset:: ")
+data.head()
+
+
+
+clf_gini = DecisionTreeClassifier(criterion = "gini", random_state = 100, max_depth=3, min_samples_leaf=5)
+clf_gini.fit(x_train, y_train.values.ravel())
+
+
+clf_entropy = DecisionTreeClassifier(criterion = "entropy", random_state = 100, max_depth=3, min_samples_leaf=5)
+clf_entropy.fit(x_train, y_train)
+
+
+#Gini Index predicton on test datasetPython
+
+y_pred = clf_gini.predict(x_test)
+
+print( "Accuracy is ", accuracy_score(y_test,y_pred))
+print(metrics.classification_report(y_test,y_pred))
+#calculate confusion matrix
+confusion=metrics.confusion_matrix(y_test,y_pred)
+print("confusion")
+print(confusion)
+
