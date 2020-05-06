@@ -1,12 +1,6 @@
 -------------readmefile--------
 
+Magic telescope data set.
+This data set was created by MC (Monte Carlo ) simulations for the registration of high energy gamma particles by atmospheric 1 gamma telescope. The features of the dataset are pulses created by the incoming Cherenkov photons on the photomultiplier tubes of the telescope. Depending on the received energy, the primary gamma, several Cherenkov photons get collected, in patterns (called the shower image), allowing to discriminate statistically those caused by primary gammas signal from the images of hadronic showers initiated by cosmic rays (class: signal) or background signal found in the upper atmosphere (class: background)
 
-1.Run the code
-2. 3 graphs are goin to plot then close them (univariate )
-3. 2 graphs will plot (bi-variate)
-4.close them
-5. the correlation graph will plot the again close it
-6. then wait for a while all data will display from transforamation output
-7. then DBSCAN algorithm will run and display data & plot clusters
-8. then ffinity propagation clustering algorithm will run and  display data & plot data
-9. then KMeans will run and  display data & plot clusters
+Dataset Size: 19020 rows × 11 columns
